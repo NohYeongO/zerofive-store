@@ -1,0 +1,21 @@
+plugins {
+    alias(libs.plugins.spring.boot)
+}
+
+dependencies {
+    implementation project(':core')
+    implementation project(':module-account')
+    implementation project(':module-coupon')
+    implementation project(':module-cart')
+    implementation project(':module-order')
+    implementation project(':module-product')
+
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.springdoc.openapi
+
+    runtimeOnly libs.mysql.connector
+
+    testImplementation libs.testcontainers.mysql
+    testImplementation libs.testcontainers.junit5
+}
