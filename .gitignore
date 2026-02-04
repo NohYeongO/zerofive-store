@@ -44,5 +44,6 @@ Thumbs.db
 .env.*
 application-local.yml
 
-# Claude progress
+# Claude
 claude/
+CLAUDE.md
