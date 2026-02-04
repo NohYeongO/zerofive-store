@@ -1,0 +1,9 @@
+rootProject.name = 'zerofive-store'
+
+include 'core'
+include 'api'
+include 'module-account'
+include 'module-coupon'
+include 'module-cart'
+include 'module-order'
+include 'module-product'
