@@ -4,7 +4,7 @@ import com.zerofive.store.api.controller.cart.request.CartItemAddRequest;
 import com.zerofive.store.api.controller.cart.request.CartItemUpdateRequest;
 import com.zerofive.store.api.controller.cart.response.CartItemResponse;
 import com.zerofive.store.api.controller.cart.response.CartResponse;
-import com.zerofive.store.core.response.ApiResponse;
+import com.zerofive.store.core.response.ApiResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -36,28 +36,28 @@ public class CartController {
 
     @Operation(summary = "장바구니 조회")
     @GetMapping
-    public ApiResponse<CartResponse> getCart() {
-        return ApiResponse.ok(MOCK_CART);
+    public ApiResult<CartResponse> getCart() {
+        return ApiResult.ok(MOCK_CART);
     }
 
     @Operation(summary = "장바구니 상품 추가")
     @PostMapping("/items")
-    public ApiResponse<CartResponse> addItem(@RequestBody @Valid CartItemAddRequest request) {
-        return ApiResponse.ok(MOCK_CART);
+    public ApiResult<CartResponse> addItem(@RequestBody @Valid CartItemAddRequest request) {
+        return ApiResult.ok(MOCK_CART);
     }
 
     @Operation(summary = "장바구니 상품 수량 변경")
     @PatchMapping("/items/{cartItemId}")
-    public ApiResponse<CartResponse> updateItem(
+    public ApiResult<CartResponse> updateItem(
             @Parameter(description = "장바구니 항목 ID") @PathVariable Long cartItemId,
             @RequestBody @Valid CartItemUpdateRequest request) {
-        return ApiResponse.ok(MOCK_CART);
+        return ApiResult.ok(MOCK_CART);
     }
 
     @Operation(summary = "장바구니 상품 삭제")
     @DeleteMapping("/items/{cartItemId}")
-    public ApiResponse<Void> deleteItem(
+    public ApiResult<Void> deleteItem(
             @Parameter(description = "장바구니 항목 ID") @PathVariable Long cartItemId) {
-        return ApiResponse.ok(null);
+        return ApiResult.ok(null);
     }
 }

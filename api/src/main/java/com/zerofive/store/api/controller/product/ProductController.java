@@ -1,7 +1,7 @@
 package com.zerofive.store.api.controller.product;
 
 import com.zerofive.store.api.controller.product.response.ProductResponse;
-import com.zerofive.store.core.response.ApiResponse;
+import com.zerofive.store.core.response.ApiResult;
 import com.zerofive.store.core.response.PageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,7 +21,7 @@ public class ProductController {
 
     @Operation(summary = "상품 목록 조회 (페이지네이션)")
     @GetMapping
-    public ApiResponse<PageResponse<ProductResponse>> getProducts(
+    public ApiResult<PageResponse<ProductResponse>> getProducts(
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "카테고리") @RequestParam(required = false) String category) {
@@ -31,32 +31,32 @@ public class ProductController {
                 new ProductResponse(2L, "스마트 워치", 189000, 50, "ELECTRONICS")
         );
         PageResponse<ProductResponse> mock = new PageResponse<>(products, page, size, 2, 1);
-        return ApiResponse.ok(mock);
+        return ApiResult.ok(mock);
     }
 
     @Operation(summary = "상품 상세 조회")
     @GetMapping("/{productId}")
-    public ApiResponse<ProductResponse> getProduct(
+    public ApiResult<ProductResponse> getProduct(
             @Parameter(description = "상품 ID") @PathVariable Long productId) {
 
         ProductResponse mock = new ProductResponse(productId, "무선 이어폰", 59000, 100, "ELECTRONICS");
-        return ApiResponse.ok(mock);
+        return ApiResult.ok(mock);
     }
 
     @Operation(summary = "인기 상품 조회")
     @GetMapping("/popular")
-    public ApiResponse<List<ProductResponse>> getPopularProducts() {
+    public ApiResult<List<ProductResponse>> getPopularProducts() {
         List<ProductResponse> mock = List.of(
                 new ProductResponse(1L, "무선 이어폰", 59000, 100, "ELECTRONICS"),
                 new ProductResponse(3L, "프리미엄 텀블러", 32000, 200, "LIFESTYLE"),
                 new ProductResponse(5L, "기계식 키보드", 129000, 30, "ELECTRONICS")
         );
-        return ApiResponse.ok(mock);
+        return ApiResult.ok(mock);
     }
 
     @Operation(summary = "상품 검색")
     @GetMapping("/search")
-    public ApiResponse<PageResponse<ProductResponse>> searchProducts(
+    public ApiResult<PageResponse<ProductResponse>> searchProducts(
             @Parameter(description = "검색 키워드") @RequestParam String keyword,
             @Parameter(description = "페이지 번호") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "페이지 크기") @RequestParam(defaultValue = "20") int size) {
@@ -65,6 +65,6 @@ public class ProductController {
                 new ProductResponse(1L, "무선 이어폰", 59000, 100, "ELECTRONICS")
         );
         PageResponse<ProductResponse> mock = new PageResponse<>(products, page, size, 1, 1);
-        return ApiResponse.ok(mock);
+        return ApiResult.ok(mock);
     }
 }
