@@ -4,7 +4,7 @@ import com.zerofive.store.api.controller.order.request.OrderCreateRequest;
 import com.zerofive.store.api.controller.order.response.OrderItemResponse;
 import com.zerofive.store.api.controller.order.response.OrderResponse;
 import com.zerofive.store.api.controller.order.response.OrderSummaryResponse;
-import com.zerofive.store.core.response.ApiResponse;
+import com.zerofive.store.core.response.ApiResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -39,13 +39,13 @@ public class OrderController {
 
     @Operation(summary = "주문 생성 (주문페이지 이동, 재고 차감)")
     @PostMapping
-    public ApiResponse<OrderResponse> createOrder(@RequestBody @Valid OrderCreateRequest request) {
-        return ApiResponse.ok(MOCK_ORDER);
+    public ApiResult<OrderResponse> createOrder(@RequestBody @Valid OrderCreateRequest request) {
+        return ApiResult.ok(MOCK_ORDER);
     }
 
     @Operation(summary = "결제 (주문 완료)")
     @PostMapping("/{orderId}/payment")
-    public ApiResponse<OrderResponse> payment(
+    public ApiResult<OrderResponse> payment(
             @Parameter(description = "주문 ID") @PathVariable Long orderId) {
         OrderResponse paid = new OrderResponse(
                 orderId, "PAID",
@@ -55,23 +55,23 @@ public class OrderController {
                 MOCK_ORDER.paymentAmount(),
                 MOCK_ORDER.orderedAt()
         );
-        return ApiResponse.ok(paid);
+        return ApiResult.ok(paid);
     }
 
     @Operation(summary = "주문 목록 조회")
     @GetMapping
-    public ApiResponse<List<OrderSummaryResponse>> getOrders() {
+    public ApiResult<List<OrderSummaryResponse>> getOrders() {
         List<OrderSummaryResponse> mock = List.of(
                 new OrderSummaryResponse(1L, "PAID", 3, 145000, LocalDateTime.now().minusDays(1)),
                 new OrderSummaryResponse(2L, "PENDING", 1, 59000, LocalDateTime.now())
         );
-        return ApiResponse.ok(mock);
+        return ApiResult.ok(mock);
     }
 
     @Operation(summary = "주문 상세 조회")
     @GetMapping("/{orderId}")
-    public ApiResponse<OrderResponse> getOrder(
+    public ApiResult<OrderResponse> getOrder(
             @Parameter(description = "주문 ID") @PathVariable Long orderId) {
-        return ApiResponse.ok(MOCK_ORDER);
+        return ApiResult.ok(MOCK_ORDER);
     }
 }
