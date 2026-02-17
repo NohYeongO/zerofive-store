@@ -1,5 +1,6 @@
 package com.zerofive.store.api.controller.coupon.response;
 
+import com.zerofive.store.coupon.domain.entity.IssuedCoupon;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
@@ -21,4 +22,13 @@ public record MyCouponResponse(
         @Schema(description = "발급 일시")
         LocalDateTime issuedAt
 ) {
+    public static MyCouponResponse from(IssuedCoupon issuedCoupon) {
+        return new MyCouponResponse(
+                issuedCoupon.getCoupon().getId(),
+                issuedCoupon.getCoupon().getName(),
+                issuedCoupon.getCoupon().getDiscountAmount(),
+                issuedCoupon.isUsed(),
+                issuedCoupon.getCreatedAt()
+        );
+    }
 }

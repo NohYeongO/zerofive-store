@@ -1,0 +1,391 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "code": { "language": "plaintext", "showLineNumbers": false },
+        "content": "# 쿠폰 발급 부하테스트 대시보드\n**테스트 시나리오**: 1단계(100명 발급) → 2단계(100명 중복시도) → 3단계(900명 동시발급, 100명 성공 / 800명 품절)",
+        "mode": "markdown"
+      },
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 3 },
+      "id": 10,
+      "title": "발급 결과 요약",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 4 },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "title": "SUCCESS (발급 성공)",
+      "description": "쿠폰 발급에 성공한 요청 수 (예상: 200)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT sum(\"value\") FROM \"coupon_issue_success\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "yellow", "value": null }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 4 },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "title": "DUPLICATE (중복 차단)",
+      "description": "중복 발급 시도가 차단된 요청 수 (예상: 100)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT sum(\"value\") FROM \"coupon_issue_duplicate\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 4 },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "title": "SOLD_OUT (재고 소진)",
+      "description": "재고 소진으로 발급 실패한 요청 수 (예상: 800)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT sum(\"value\") FROM \"coupon_issue_soldout\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 4 },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "title": "FAILED (오류)",
+      "description": "기타 오류로 실패한 요청 수 (예상: 0)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT sum(\"value\") FROM \"coupon_issue_fail\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 10 },
+      "id": 20,
+      "title": "실시간 발급 현황",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1, "stacking": { "mode": "normal" } },
+          "unit": "none"
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "SUCCESS" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "DUPLICATE" }, "properties": [{ "id": "color", "value": { "fixedColor": "yellow", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "SOLD_OUT" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "FAILED" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 11 },
+      "id": 21,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "쿠폰 발급 결과 (시간별)",
+      "type": "timeseries",
+      "targets": [
+        { "alias": "SUCCESS", "query": "SELECT sum(\"value\") FROM \"coupon_issue_success\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "A" },
+        { "alias": "DUPLICATE", "query": "SELECT sum(\"value\") FROM \"coupon_issue_duplicate\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "B" },
+        { "alias": "SOLD_OUT", "query": "SELECT sum(\"value\") FROM \"coupon_issue_soldout\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "C" },
+        { "alias": "FAILED", "query": "SELECT sum(\"value\") FROM \"coupon_issue_fail\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "D" }
+      ]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 30, "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "stacking": { "mode": "none" } },
+          "unit": "none"
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "대기열 진입" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "진입 실패" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 11 },
+      "id": 22,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "대기열 진입 현황",
+      "type": "timeseries",
+      "targets": [
+        { "alias": "대기열 진입", "query": "SELECT sum(\"value\") FROM \"queue_entry_success\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "A" },
+        { "alias": "진입 실패", "query": "SELECT sum(\"value\") FROM \"queue_entry_fail\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "B" }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 },
+      "id": 30,
+      "title": "API 응답시간",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "pointSize": 5, "showPoints": "auto" },
+          "unit": "ms"
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "평균" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "p95" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "최대" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "id": 31,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "대기열 진입 응답시간",
+      "type": "timeseries",
+      "targets": [
+        { "alias": "평균", "query": "SELECT mean(\"value\") FROM \"queue_entry_duration\" WHERE $timeFilter GROUP BY time(1s) fill(null)", "rawQuery": true, "refId": "A" },
+        { "alias": "p95", "query": "SELECT percentile(\"value\", 95) FROM \"queue_entry_duration\" WHERE $timeFilter GROUP BY time(1s) fill(null)", "rawQuery": true, "refId": "B" },
+        { "alias": "최대", "query": "SELECT max(\"value\") FROM \"queue_entry_duration\" WHERE $timeFilter GROUP BY time(1s) fill(null)", "rawQuery": true, "refId": "C" }
+      ]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "pointSize": 5, "showPoints": "auto" },
+          "unit": "ms"
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "평균" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "p95" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "최대" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "id": 32,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "쿠폰 발급 응답시간",
+      "type": "timeseries",
+      "targets": [
+        { "alias": "평균", "query": "SELECT mean(\"value\") FROM \"coupon_issue_duration\" WHERE $timeFilter GROUP BY time(1s) fill(null)", "rawQuery": true, "refId": "A" },
+        { "alias": "p95", "query": "SELECT percentile(\"value\", 95) FROM \"coupon_issue_duration\" WHERE $timeFilter GROUP BY time(1s) fill(null)", "rawQuery": true, "refId": "B" },
+        { "alias": "최대", "query": "SELECT max(\"value\") FROM \"coupon_issue_duration\" WHERE $timeFilter GROUP BY time(1s) fill(null)", "rawQuery": true, "refId": "C" }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 },
+      "id": 40,
+      "title": "성능 요약",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 500 }, { "color": "red", "value": 1000 }] },
+          "unit": "ms",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 31 },
+      "id": 41,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "대기열 진입 - 평균",
+      "type": "stat",
+      "targets": [{ "query": "SELECT mean(\"value\") FROM \"queue_entry_duration\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1000 }, { "color": "red", "value": 2000 }] },
+          "unit": "ms",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 31 },
+      "id": 42,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "대기열 진입 - p95",
+      "type": "stat",
+      "targets": [{ "query": "SELECT percentile(\"value\", 95) FROM \"queue_entry_duration\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 500 }, { "color": "red", "value": 1000 }] },
+          "unit": "ms",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 31 },
+      "id": 43,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "쿠폰 발급 - 평균",
+      "type": "stat",
+      "targets": [{ "query": "SELECT mean(\"value\") FROM \"coupon_issue_duration\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1000 }, { "color": "red", "value": 2000 }] },
+          "unit": "ms",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 31 },
+      "id": 44,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "쿠폰 발급 - p95",
+      "type": "stat",
+      "targets": [{ "query": "SELECT percentile(\"value\", 95) FROM \"coupon_issue_duration\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 0, "y": 35 },
+      "id": 45,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["max"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "최대 동시 사용자 (VUs)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT max(\"value\") FROM \"vus\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "purple", "value": null }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 8, "y": 35 },
+      "id": 46,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "총 대기열 진입",
+      "type": "stat",
+      "targets": [{ "query": "SELECT sum(\"value\") FROM \"queue_entry_success\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "reqps",
+          "decimals": 1
+        }
+      },
+      "gridPos": { "h": 4, "w": 8, "x": 16, "y": 35 },
+      "id": 47,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "평균 처리량 (RPS)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT mean(\"value\") FROM \"http_reqs\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["k6", "load-test", "coupon"],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "쿠폰 발급 부하테스트",
+  "uid": "k6-coupon-load-test",
+  "version": 1
+}

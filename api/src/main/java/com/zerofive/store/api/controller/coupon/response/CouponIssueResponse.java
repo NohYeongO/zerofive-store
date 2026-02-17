@@ -7,4 +7,7 @@ public record CouponIssueResponse(
         @Schema(description = "발급 상태", example = "ISSUED")
         String status
 ) {
+    public static CouponIssueResponse issued() {
+        return new CouponIssueResponse("ISSUED");
+    }
 }
