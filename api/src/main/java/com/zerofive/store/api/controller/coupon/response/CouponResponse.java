@@ -1,5 +1,6 @@
 package com.zerofive.store.api.controller.coupon.response;
 
+import com.zerofive.store.coupon.domain.entity.Coupon;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "쿠폰 응답")
@@ -19,4 +20,13 @@ public record CouponResponse(
         @Schema(description = "발급된 수량", example = "0")
         int issuedQuantity
 ) {
+    public static CouponResponse from(Coupon coupon) {
+        return new CouponResponse(
+                coupon.getId(),
+                coupon.getName(),
+                coupon.getDiscountAmount(),
+                coupon.getTotalQuantity(),
+                coupon.getIssuedQuantity()
+        );
+    }
 }
