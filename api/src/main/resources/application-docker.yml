@@ -1,0 +1,9 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+logging:
+  level:
+    com.zerofive.store: INFO
+    org.springframework.web: INFO
