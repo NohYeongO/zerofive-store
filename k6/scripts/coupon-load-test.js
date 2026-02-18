@@ -1,6 +1,8 @@
 import http from 'k6/http';
 import { sleep } from 'k6';
 import { Counter, Trend } from 'k6/metrics';
+import exec from 'k6/execution';
+import { SharedArray } from 'k6/data';
 
 // =============================================================================
 // 설정
@@ -11,6 +13,33 @@ const FIRST_BATCH = 100;
 const SECOND_BATCH = 900;
 const EVENT_ID = 1;
 const COUPON_ID = 1;
+
+// =============================================================================
+// 유저 배열 생성 (for문으로 명시적 생성)
+// =============================================================================
+const phase1Users = new SharedArray('phase1Users', function() {
+    const users = [];
+    for (let i = 1; i <= 100; i++) {
+        users.push(i);
+    }
+    return users;  // [1, 2, 3, ..., 100]
+});
+
+const phase2Users = new SharedArray('phase2Users', function() {
+    const users = [];
+    for (let i = 1; i <= 100; i++) {
+        users.push(i);
+    }
+    return users;  // [1, 2, 3, ..., 100]
+});
+
+const phase3Users = new SharedArray('phase3Users', function() {
+    const users = [];
+    for (let i = 101; i <= 1000; i++) {
+        users.push(i);
+    }
+    return users;  // [101, 102, ..., 1000]
+});
 
 // =============================================================================
 // 커스텀 메트릭
@@ -46,7 +75,7 @@ export const options = {
             iterations: 1,
             maxDuration: '1m',
             exec: 'phase2Duplicate',
-            startTime: '60s',
+            startTime: '15s',
         },
         phase3_load_test: {
             executor: 'per-vu-iterations',
@@ -54,7 +83,7 @@ export const options = {
             iterations: 1,
             maxDuration: '3m',
             exec: 'phase3LoadTest',
-            startTime: '90s',
+            startTime: '20s',
         },
     },
     thresholds: {
@@ -212,7 +241,8 @@ function countResult(result) {
 export function phase1FirstIssue(data) {
     if (!data.ready) return;
 
-    const userNum = __VU;
+    const index = exec.scenario.iterationInInstance;
+    const userNum = phase1Users[index];  // [1, 2, ..., 100]
     const token = login(userNum);
     if (!token) {
         couponIssueFail.add(1);
@@ -229,7 +259,8 @@ export function phase1FirstIssue(data) {
 export function phase2Duplicate(data) {
     if (!data.ready) return;
 
-    const userNum = __VU - FIRST_BATCH;
+    const index = exec.scenario.iterationInInstance;
+    const userNum = phase2Users[index];  // [1, 2, ..., 100]
     const token = login(userNum);
     if (!token) {
         couponIssueFail.add(1);
@@ -246,7 +277,8 @@ export function phase2Duplicate(data) {
 export function phase3LoadTest(data) {
     if (!data.ready) return;
 
-    const userNum = __VU - FIRST_BATCH;
+    const index = exec.scenario.iterationInInstance;
+    const userNum = phase3Users[index];  // [101, 102, ..., 1000]
     const token = login(userNum);
     if (!token) {
         couponIssueFail.add(1);
