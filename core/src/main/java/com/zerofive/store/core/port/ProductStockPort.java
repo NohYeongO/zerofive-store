@@ -1,8 +1,13 @@
 package com.zerofive.store.core.port;
 
+import java.util.List;
+
 public interface ProductStockPort {
 
-    boolean checkStock(Long productId, int quantity);
+    void deductStock(List<StockItem> items);
 
-    void deductStock(Long productId, int quantity);
+    void restoreStock(List<StockItem> items);
+
+    record StockItem(Long productId, int quantity) {
+    }
 }
