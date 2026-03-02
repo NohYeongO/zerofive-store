@@ -16,6 +16,15 @@ public class GlobalExceptionHandler {
                 .body(ApiResult.error(e.getCode(), e.getMessage()));
     }
 
+    @ExceptionHandler(StockException.class)
+    public ResponseEntity<ApiResult<Void>> handleStockException(StockException e) {
+        String message = String.format("[%s] %s (productId: %d)",
+                e.getErrorCode(), e.getMessage(), e.getProductId());
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResult.error(400, message));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResult<Void>> handleValidationException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().stream()
