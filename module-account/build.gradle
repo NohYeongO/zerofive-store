@@ -10,5 +10,5 @@ dependencies {
 
     runtimeOnly libs.mysql.connector
 
-    testImplementation libs.spring.boot.starter.test
+    testImplementation project(':core').sourceSets.test.output
 }

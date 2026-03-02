@@ -37,6 +37,9 @@ subprojects {
         testAnnotationProcessor libs.lombok
 
         testImplementation libs.spring.boot.starter.test
+        testImplementation libs.testcontainers.mysql
+        testImplementation libs.testcontainers.junit5
+        testRuntimeOnly libs.mysql.connector
     }
 
     test {
