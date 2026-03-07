@@ -1,13 +1,19 @@
 package com.zerofive.store.order.application;
 
 import com.zerofive.store.core.exception.NotFoundException;
+import com.zerofive.store.core.exception.PaymentException;
 import com.zerofive.store.core.exception.StockException;
 import com.zerofive.store.core.port.AddressPort;
 import com.zerofive.store.core.port.CouponPort;
+import com.zerofive.store.core.port.PaymentPort;
 import com.zerofive.store.core.port.ProductStockPort;
 import com.zerofive.store.order.application.dto.OrderItemRequest;
+import com.zerofive.store.order.application.dto.OrderResult;
 import com.zerofive.store.order.application.dto.OrderSessionResult;
+import com.zerofive.store.order.application.dto.PaymentRequest;
+import com.zerofive.store.order.domain.OrderService;
 import com.zerofive.store.order.domain.OrderSessionService;
+import com.zerofive.store.order.domain.entity.Order;
 import com.zerofive.store.order.domain.entity.OrderSession;
 import com.zerofive.store.order.infra.repository.OrderSessionRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,9 +31,11 @@ public class OrderAppService {
 
     private final OrderSessionService orderSessionService;
     private final OrderSessionRepository orderSessionRepository;
+    private final OrderService orderService;
     private final ProductStockPort productStockPort;
     private final CouponPort couponPort;
     private final AddressPort addressPort;
+    private final PaymentPort paymentPort;
 
     public OrderSessionResult createOrder(Long accountId, List<OrderItemRequest> items) {
         List<OrderItemRequest> sortedItems = items.stream()
@@ -80,5 +88,49 @@ public class OrderAppService {
 
         productStockPort.restoreStock(stockItems);
         orderSessionRepository.delete(session);
+    }
+
+    public OrderResult processPayment(PaymentRequest request) {
+        OrderSession session = orderSessionRepository.findBySessionIdWithItems(request.sessionId())
+                .orElseThrow(() -> new NotFoundException("주문 세션을 찾을 수 없습니다. sessionId: " + request.sessionId()));
+
+        int totalPrice = session.getItems().stream()
+                .mapToInt(item -> item.getPrice() * item.getQuantity())
+                .sum();
+
+        int discountAmount = 0;
+        if (request.couponId() != null) {
+            CouponPort.CouponInfo couponInfo = couponPort.validateAndApply(request.couponId(), session.getAccountId());
+            discountAmount = couponInfo.discountAmount();
+        }
+
+        int paymentAmount = Math.max(0, totalPrice - discountAmount);
+
+        String orderId = session.getSessionId();
+        PaymentPort.PaymentResult paymentResult = paymentPort.processPayment(
+                new PaymentPort.PaymentRequest(session.getAccountId(), paymentAmount, orderId)
+        );
+
+        if (!paymentResult.success()) {
+            if (request.couponId() != null) {
+                couponPort.cancelUsage(request.couponId(), session.getAccountId());
+                log.info("결제 실패로 쿠폰 사용 취소: couponId={}", request.couponId());
+            }
+            log.error("결제 실패: sessionId={}, reason={}", request.sessionId(), paymentResult.failReason());
+            throw PaymentException.failed(paymentResult.failReason());
+        }
+
+        Order order = orderService.createOrder(
+                session,
+                totalPrice,
+                discountAmount,
+                request.couponId(),
+                request.addressId(),
+                paymentResult.transactionId()
+        );
+
+        log.info("주문 완료: orderId={}, transactionId={}", order.getId(), paymentResult.transactionId());
+
+        return OrderResult.from(order);
     }
 }
