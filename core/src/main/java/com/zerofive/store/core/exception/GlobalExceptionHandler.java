@@ -25,6 +25,14 @@ public class GlobalExceptionHandler {
                 .body(ApiResult.error(400, message));
     }
 
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<ApiResult<Void>> handlePaymentException(PaymentException e) {
+        String message = String.format("[%s] %s", e.getErrorCode(), e.getMessage());
+        return ResponseEntity
+                .badRequest()
+                .body(ApiResult.error(400, message));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResult<Void>> handleValidationException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().stream()

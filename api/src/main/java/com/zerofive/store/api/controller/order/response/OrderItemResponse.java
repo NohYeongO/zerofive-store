@@ -4,9 +4,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @Schema(description = "주문 상품 항목 응답")
 public record OrderItemResponse(
-        @Schema(description = "주문 항목 ID", example = "1")
-        Long id,
-
         @Schema(description = "상품 ID", example = "1")
         Long productId,
 

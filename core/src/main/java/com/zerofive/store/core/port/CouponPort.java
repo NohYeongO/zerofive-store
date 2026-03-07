@@ -6,6 +6,8 @@ public interface CouponPort {
 
     CouponInfo validateAndApply(Long couponId, Long accountId);
 
+    void cancelUsage(Long couponId, Long accountId);
+
     List<CouponInfo> getAvailableCoupons(Long accountId);
 
     record CouponInfo(Long couponId, String couponName, int discountAmount) {
