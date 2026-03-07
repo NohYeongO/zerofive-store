@@ -1,0 +1,308 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "liveNow": true,
+  "panels": [
+    {
+      "gridPos": { "h": 3, "w": 24, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "code": { "language": "plaintext", "showLineNumbers": false },
+        "content": "# 주문 동시성 부하테스트 대시보드\n**테스트 시나리오**: 100명이 동시에 상품 1,2,3을 랜덤 순서로 주문 → 재고 50개씩이므로 50명만 성공해야 함 (데드락 0건)",
+        "mode": "markdown"
+      },
+      "type": "text"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 3 },
+      "id": 10,
+      "title": "주문 결과 요약",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 0, "y": 4 },
+      "id": 11,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "title": "SUCCESS (주문 성공)",
+      "description": "주문에 성공한 요청 수 (예상: 50)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT sum(\"value\") FROM \"order_success\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "orange", "value": null }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 6, "y": 4 },
+      "id": 12,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "title": "STOCK_FAIL (재고 부족)",
+      "description": "재고 부족으로 실패한 요청 수 (예상: 50)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT sum(\"value\") FROM \"order_stock_fail\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 12, "y": 4 },
+      "id": 13,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "title": "DEADLOCK (데드락)",
+      "description": "데드락 발생 건수 (예상: 0)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT sum(\"value\") FROM \"deadlock_detected\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "red", "value": 1 }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 6, "w": 6, "x": 18, "y": 4 },
+      "id": 14,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "center",
+        "orientation": "horizontal",
+        "reduceOptions": { "calcs": ["sum"], "fields": "", "values": false },
+        "textMode": "value_and_name"
+      },
+      "title": "FAILED (기타 오류)",
+      "description": "기타 오류로 실패한 요청 수 (예상: 0)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT sum(\"value\") FROM \"order_fail\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 10 },
+      "id": 20,
+      "title": "실시간 주문 현황",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "bars", "fillOpacity": 80, "lineWidth": 1, "stacking": { "mode": "normal" } },
+          "unit": "none"
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "SUCCESS" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "STOCK_FAIL" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "DEADLOCK" }, "properties": [{ "id": "color", "value": { "fixedColor": "purple", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "FAILED" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 0, "y": 11 },
+      "id": 21,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "주문 결과 (시간별)",
+      "type": "timeseries",
+      "targets": [
+        { "alias": "SUCCESS", "query": "SELECT sum(\"value\") FROM \"order_success\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "A" },
+        { "alias": "STOCK_FAIL", "query": "SELECT sum(\"value\") FROM \"order_stock_fail\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "B" },
+        { "alias": "DEADLOCK", "query": "SELECT sum(\"value\") FROM \"deadlock_detected\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "C" },
+        { "alias": "FAILED", "query": "SELECT sum(\"value\") FROM \"order_fail\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "D" }
+      ]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 30, "lineWidth": 2, "pointSize": 5, "showPoints": "auto", "stacking": { "mode": "none" } },
+          "unit": "none"
+        }
+      },
+      "gridPos": { "h": 10, "w": 12, "x": 12, "y": 11 },
+      "id": 22,
+      "options": {
+        "legend": { "calcs": ["sum"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "누적 주문 현황",
+      "type": "timeseries",
+      "targets": [
+        { "alias": "누적 성공", "query": "SELECT cumulative_sum(sum(\"value\")) FROM \"order_success\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "A" },
+        { "alias": "누적 재고부족", "query": "SELECT cumulative_sum(sum(\"value\")) FROM \"order_stock_fail\" WHERE $timeFilter GROUP BY time(1s) fill(0)", "rawQuery": true, "refId": "B" }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 },
+      "id": 30,
+      "title": "API 응답시간",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "pointSize": 5, "showPoints": "auto" },
+          "unit": "ms"
+        },
+        "overrides": [
+          { "matcher": { "id": "byName", "options": "평균" }, "properties": [{ "id": "color", "value": { "fixedColor": "blue", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "p95" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+          { "matcher": { "id": "byName", "options": "최대" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] }
+        ]
+      },
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 22 },
+      "id": 31,
+      "options": {
+        "legend": { "calcs": ["mean", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "title": "주문 API 응답시간",
+      "type": "timeseries",
+      "targets": [
+        { "alias": "평균", "query": "SELECT mean(\"value\") FROM \"order_duration\" WHERE $timeFilter GROUP BY time(1s) fill(null)", "rawQuery": true, "refId": "A" },
+        { "alias": "p95", "query": "SELECT percentile(\"value\", 95) FROM \"order_duration\" WHERE $timeFilter GROUP BY time(1s) fill(null)", "rawQuery": true, "refId": "B" },
+        { "alias": "최대", "query": "SELECT max(\"value\") FROM \"order_duration\" WHERE $timeFilter GROUP BY time(1s) fill(null)", "rawQuery": true, "refId": "C" }
+      ]
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 },
+      "id": 40,
+      "title": "성능 요약",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1000 }, { "color": "red", "value": 3000 }] },
+          "unit": "ms",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 31 },
+      "id": 41,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "주문 API - 평균",
+      "type": "stat",
+      "targets": [{ "query": "SELECT mean(\"value\") FROM \"order_duration\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 2000 }, { "color": "red", "value": 5000 }] },
+          "unit": "ms",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 31 },
+      "id": 42,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "주문 API - p95",
+      "type": "stat",
+      "targets": [{ "query": "SELECT percentile(\"value\", 95) FROM \"order_duration\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "blue", "value": null }] },
+          "unit": "none",
+          "decimals": 0
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 31 },
+      "id": 43,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["max"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "최대 동시 사용자 (VUs)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT max(\"value\") FROM \"vus\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "influxdb" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] },
+          "unit": "reqps",
+          "decimals": 1
+        }
+      },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 31 },
+      "id": 44,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["mean"], "fields": "", "values": false }, "textMode": "auto" },
+      "title": "평균 처리량 (RPS)",
+      "type": "stat",
+      "targets": [{ "query": "SELECT mean(\"value\") FROM \"http_reqs\" WHERE $timeFilter", "rawQuery": true, "refId": "A" }]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["k6", "load-test", "order"],
+  "templating": { "list": [] },
+  "time": { "from": "now-15m", "to": "now" },
+  "timepicker": {},
+  "timezone": "",
+  "title": "주문 동시성 부하테스트",
+  "uid": "k6-order-load-test",
+  "version": 1
+}

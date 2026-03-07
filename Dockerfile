@@ -14,6 +14,7 @@ COPY module-coupon module-coupon
 COPY module-cart module-cart
 COPY module-order module-order
 COPY module-product module-product
+COPY module-payment module-payment
 
 RUN chmod +x gradlew
 RUN ./gradlew :api:bootJar -x test --no-daemon
