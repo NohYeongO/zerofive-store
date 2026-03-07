@@ -43,6 +43,15 @@ public class CouponPortService implements CouponPort {
     }
 
     @Override
+    @Transactional
+    public void cancelUsage(Long couponId, Long accountId) {
+        IssuedCoupon issuedCoupon = issuedCouponRepository.findByCouponIdAndAccountId(couponId, accountId)
+                .orElseThrow(() -> new NotFoundException("발급된 쿠폰을 찾을 수 없습니다."));
+
+        issuedCoupon.cancelUsage();
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<CouponInfo> getAvailableCoupons(Long accountId) {
         return issuedCouponRepository.findByAccountId(accountId).stream()

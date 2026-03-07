@@ -44,4 +44,8 @@ public class IssuedCoupon extends BaseEntity {
         }
         this.used = true;
     }
+
+    public void cancelUsage() {
+        this.used = false;
+    }
 }
