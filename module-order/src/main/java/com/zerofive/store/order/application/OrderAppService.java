@@ -11,6 +11,7 @@ import com.zerofive.store.order.application.dto.OrderItemRequest;
 import com.zerofive.store.order.application.dto.OrderResult;
 import com.zerofive.store.order.application.dto.OrderSessionResult;
 import com.zerofive.store.order.application.dto.PaymentRequest;
+import com.zerofive.store.order.domain.OrderReadService;
 import com.zerofive.store.order.domain.OrderService;
 import com.zerofive.store.order.domain.OrderSessionService;
 import com.zerofive.store.order.domain.entity.Order;
@@ -32,6 +33,7 @@ public class OrderAppService {
     private final OrderSessionService orderSessionService;
     private final OrderSessionRepository orderSessionRepository;
     private final OrderService orderService;
+    private final OrderReadService orderReadService;
     private final ProductStockPort productStockPort;
     private final CouponPort couponPort;
     private final AddressPort addressPort;
@@ -131,6 +133,17 @@ public class OrderAppService {
 
         log.info("주문 완료: orderId={}, transactionId={}", order.getId(), paymentResult.transactionId());
 
+        return OrderResult.from(order);
+    }
+
+    public List<OrderResult> getOrders(Long accountId) {
+        return orderReadService.getOrdersByAccountId(accountId).stream()
+                .map(OrderResult::from)
+                .toList();
+    }
+
+    public OrderResult getOrder(Long orderId, Long accountId) {
+        Order order = orderReadService.getOrder(orderId, accountId);
         return OrderResult.from(order);
     }
 }

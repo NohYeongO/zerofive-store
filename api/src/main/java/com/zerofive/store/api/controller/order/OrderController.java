@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -64,6 +65,25 @@ public class OrderController {
     public ApiResult<OrderResponse> processPayment(
             @RequestBody @Valid PaymentRequest request) {
         OrderResult result = orderAppService.processPayment(request.toServiceDto());
+        return ApiResult.ok(OrderResponse.from(result));
+    }
+
+    @Operation(summary = "주문 목록 조회")
+    @GetMapping
+    public ApiResult<List<OrderResponse>> getOrders(
+            @AuthenticationPrincipal Long accountId) {
+        List<OrderResponse> orders = orderAppService.getOrders(accountId).stream()
+                .map(OrderResponse::from)
+                .toList();
+        return ApiResult.ok(orders);
+    }
+
+    @Operation(summary = "주문 상세 조회")
+    @GetMapping("/{orderId}")
+    public ApiResult<OrderResponse> getOrder(
+            @AuthenticationPrincipal Long accountId,
+            @Parameter(description = "주문 ID") @PathVariable Long orderId) {
+        OrderResult result = orderAppService.getOrder(orderId, accountId);
         return ApiResult.ok(OrderResponse.from(result));
     }
 
